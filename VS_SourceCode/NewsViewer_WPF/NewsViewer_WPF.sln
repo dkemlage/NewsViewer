@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2048
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsViewer_WPF", "NewsViewer_WPF\NewsViewer_WPF.csproj", "{F33D44AF-CFA0-4AA9-A8EC-3009BE767B0D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F33D44AF-CFA0-4AA9-A8EC-3009BE767B0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F33D44AF-CFA0-4AA9-A8EC-3009BE767B0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F33D44AF-CFA0-4AA9-A8EC-3009BE767B0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F33D44AF-CFA0-4AA9-A8EC-3009BE767B0D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B93B5E5-C12F-43ED-896A-38F1B4BA2877}
+	EndGlobalSection
+EndGlobal
