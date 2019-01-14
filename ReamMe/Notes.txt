@@ -1,54 +1,62 @@
-NewsViewer (for the Hack the Map 3) notes:
+## What it does
+The NewsViewer application allows users to browse geo-located NY Times news articles with a Windows Presentation Foundation (WPF) ArcGIS Runtime for .NET map interface.
 
-Idea for using the NY Times data set come from the Forbes article:
-Big Data: 33 Brilliant And Free Data Sources Anyone Can Use (https://www.forbes.com/sites/bernardmarr/2016/02/12/big-data-35-brilliant-and-free-data-sources-for-2016/#1cf58dedb54d)
+## Inspiration
+Idea for using the NY Times data set come from the Forbes article: **Big Data: 33 Brilliant And Free Data Sources Anyone Can Use** (https://www.forbes.com/sites/bernardmarr/2016/02/12/big-data-35-brilliant-and-free-data-sources-for-2016/#1cf58dedb54d)
 
-The New York Times Developer Network (http://developer.nytimes.com/) contains 10 free API's to get data from:
-archive_api **
-article_search
-books_api
-geo_api
-most_popular-api
-movie_reviews
-semantic_api
-timeswire
-times_tags
-top_stories **
+We chose to use The New York Times Developer Network (http://developer.nytimes.com/) REST data feed that contains 10 free API's to get data for the application. The feed options available included: **archive_api**, article_search, books_api, geo_api, most_popular-api, movie_reviews, semantic_api, timeswire, times_tags, **top_stories**). We chose to get NY Times news articles from the **archive_api** and **top_stories** REST end points. *Note:* You have to make sure and download a free API KEY from the NY Times Developer Network to access the NY Times data.
 
-** We chose to get NY Times news articles from the 'archive_api' and 'top_stories' REST end points.
-Make sure and downloaded a free API KEY from the NY Times Developer Network to access the NY Times data.
+## How we built it
+We got a free shapefile containing world boundaries (polygon) from: (http://thematicmapping.org/downloads/world_borders.php)
+We unzipped the TM_WORLD_BORDERS-0.3.zip file to extract the world boundary shapefile. We used ESRI's ArcGIS Desktop to load the TM_WORLD_BORDERS-0.3.shp  and then wrote out a new version of the shapefile with a nicer name: WorldCountries.shp.
 
-We got the free shapefile world boundaries (polygon) from: http://thematicmapping.org/downloads/world_borders.php
-Unzipped the TM_WORLD_BORDERS-0.3.zip to extract the world boundry shapefile. Used ArcGIS Desktop to load the TM_WORLD_BORDERS-0.3.shp  and then write out a new version of the shapfile with a nice name: WorldCountries.shp.
+We used the ESRI's AppStudio for ArcGIS (v3.2) to download relevant information from the NY Times news articles from the **archive_api** and **top_stories** REST end points. A custom QML and JavaScript based AppStudio application was used to pull the massive JSON NY Times article responses into memory on the computer. Then a custom algorithm was used to extract out the following subset information from the NY Times news articles: 
+- headline for the news article
+- abstract for the news article
+- country for which the news article originated or was relevant for
+- url to NY Times web site for the news article
+- small image associated with the news article
+- the date the new article was published
 
-Used ESRI AppStudio for ArcGIS (v3.2) to download relevent information from the NY Times news articles from the 'archive_api' and 'top_stories' REST end points. A custom Qml and Java Script based AppStudio application was used to pull the massive JSON NY Times article responses into memory on the computer. Then a custom algorith was used to extract out the following subset information from the NY Times news articles: 
-~ headline for the news article
-~ abstract for the news article
-~ country for which the news article originated
-~ url to NY times web site for the news article
-~ small image associated with the news article
-~ the date the new article was published
+The subset of extracted news articles was written out to individual ASCII text files by day from Jan 1, 2018 to Jan 12, 2019. Also, the top headlines news articles (typically the most current day) was written out to a single ASCII text file. Only those news articles from the REST end points that matched the country names in the WorldCountries.shp where included in the subset. 
 
-The subset of extracted news articles was written out to individual ASCII text files by day from Jan 1, 2018 to Jan 12, 2019. Also the top headlines news articles (typically the most current day) was written out to a single ASCII text file. Only those news articles from the REST end points that matched the country names in the world_borders.shp where included in the subset. 
+To use the AppStudio app to extract the data, double click on the **NYT JSON to Daily txt** app. Click the **1. SET YOUR API KEY** button and enter the NY Times API key obtained from (http://developer.nytimes.com/). Then click the **2. MAKE AN ARCHIVE REQUEST** button and choose an year and a month to extract our NY Times subset articles by day to the hard drive (in the C:\NewsViewer\NYTimesData folder). Then click the **2. MAKE A TOP STORY REQUEST** button to download the most current NY Times news articles (typically the current day) to the hard drive (in the C:\NewsViewer\NYTimesData folder).
 
-Used the ArcGIS Runtime for .NET (version 100.4) in Visual Studio 2017 with the C# language to construct a Windows Presentaton Foundation (WPF) front end News Viewer application. The applicaiton contains the following controls: MapView, RichTextBox, Button, and DatePicker. When the application starts the Oceans Basemap from ArcGIS Online and the on disk version of the WorldContries.shp are loaded. The user then clicks either the 'Load NY Times Top Stories' button or chooses archived news articles for specifc day from the DatePicker. For those NY Times news articles that correspond to a specifc country, the country will be symbolized in yellow. The user can then click on the yellow symbolized country to display all the NY Times news articles availble for that day listed in the RichTextBox. The user can then hold down the CTRL key and click on the hyperlink with the mouse for the news article and an internet browser will open revaling the entire article on the NY Times web site. 
+We used the ESRI's ArcGIS Runtime for .NET (version 100.4) in Visual Studio 2017 with the C# language to construct a Windows Presentaton Foundation (WPF) front end NewsViewer application. The application contains the following controls: MapView, RichTextBox, Button, and DatePicker. When the application starts the Oceans Basemap from ArcGIS Online and the on disk version of the WorldCountries.shp are loaded. 
 
-Ideas for futher development/refinement:
-~ More data sanitization/contitionalization could be done on the masive NY Times REST data base to get more news articles appearing in the subset information text files. For example the WorldCountries.shp has a record for 'United Kingdom' but the NY Times REST database has multiple country names for the same thing including 'England', 'Great Brittan', 'UK' and 'United Kingdom'.  
-~ Improve the RichTextBox control in the GUI of the NewsView to include the small image for the news article and make that hyperlinkable. 
-~ Make the entire application either in AppStudio to the ArcGIS Runtime for .NET.
-~ Add MarkerSymbols with text to denote how many news articles are available for a country on a particualr day.
-~ Add keyword search for news articles across multiple days.
+To use the NewsViewer app, the user clicks either the 'Load NY Times Top Stories' button or chooses an archived news article by selecting a specific day from the DatePicker control. For those NY Times news articles that correspond to a specific country, the country will be symbolized in yellow. The user can then click on the yellow symbolized country to display all the NY Times news articles available for that day listed in the RichTextBox control. The user can then hold down the **CTRL** key and click on the hyperlink with the mouse for the news article and an internet browser will open revealing the entire article on the NY Times web site. 
+
+## Challenges we ran into
+Our biggest hurdles faced included:
+- Learning how to use Microsoft WPF RichTextBox control (quality example documentation was hard to find).
+- Figuring out the best way to 'link' NY Times articles that had a country tag with the countries in the WorldCountries.shp shapefile. Unfortunately the ArcGIS Runtime for .NET (v100.4) does not have a 'table join' type of function for shapefiles like is available in the ESRI ArcMap desktop application. This would be a really nice feature to add as an enhancement! Our solution was to iterate over all the countries in the shapefile and find if there was a match for the country name in the daily NY Times text file. If a match was found, we created a FeatureCollectionLayer (via a FeatureCollectionTable) for only those countries (those symbolized in yellow) to use as the layer the user could perform an identify to list the NY Times articles for that day. **Note:** We alternatively could have also used a GraphicsOverlay rather than the FeatureCollectionLayer.
+- We quickly found out that not all of the NY Times news articles had a geo-location type of tag. This meant we were not able to link all of the NY Times news articles to country geographies.
+
+## Accomplishments that we are proud of
+We were actually able to create a fully functional application in the time allotted for the Hack-a-Thon!
+
+## What we learned
+The Hack-the-Map 3 hackathon was a blast. Our 2 person team learned how to divide up the work so that we could both stay productive and contribute to the project. We learned that while we had very different coding and ESRI development tool skill sets, we could use them in a complimentary fashion to build a great application.
+
+## What's next for NewsViewer
+These are ideas we came up with for further development/refinement:
+- More data sanitization/contitionalization could be done on the massive NY Times REST data base to get more news articles appearing in the subset information text files. For example the WorldCountries.shp has a record for 'United Kingdom' but the NY Times REST database has multiple country names for the same thing including 'England', 'Great Brittan', 'UK' and 'United Kingdom'.  
+- Improve the RichTextBox control in the GUI of the NewsView to include the small image for the news article and make that hyperlink-able. 
+- Make the entire application either in AppStudio to the ArcGIS Runtime for .NET.
+- Add MarkerSymbols with text to denote how many news articles are available for a country on a particular day.
+- Add keyword search for news articles across multiple days.
+
+## Instructions on how to get and use the NewsViewer app
+Clone the GitHub repository found at the following Url: (https://github.com/dkemlage/NewsViewer)
 
 To use this project, it is expected that the GitHub repository (https://github.com/dkemlage/NewsViewer) be downloaded to the root of the C:\ drive. You should see the following directory structure:
-C:\NewsViewer
-C:\NewsViewer\AppStudio
-C:\NewsViewer\NYTimesData
-C:\NewsViewer\ReadMe
-C:\NewsViewer\Shapefiles
-C:\NewsViewer\VS_SourceCode
+- C:\NewsViewer
+- C:\NewsViewer\AppStudio
+- C:\NewsViewer\NYTimesData
+- C:\NewsViewer\ReadMe
+- C:\NewsViewer\Shapefiles
+- C:\NewsViewer\VS_SourceCode
 
 To use the AppStudio project copy the folder (including all sub-files) in: C:\NewsViewer\AppStudio\f9ae749aba2448469d925a347e34600d to the folder: C:\Users\[YourUserName]\ArcGIS\AppStudio\Apps.
 
 To run the WPF ArcGIS Runtime for .NET NewsViewer application, start and run the Visaul Studio solution located at: C:\NewsViewer\VS_SourceCode\NewsViewer_WPF\NewsViewer_WPF.sln. You may need to add a NuGet reference in the Visual Studio project to the Esri.ArcGISRuntime.WPF by ESRI via NuGet.org.
-
