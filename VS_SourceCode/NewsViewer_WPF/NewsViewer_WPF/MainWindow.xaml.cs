@@ -3,8 +3,6 @@ using Esri.ArcGISRuntime.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.IO;
-using System.Text;
 using System.Linq;
 using Esri.ArcGISRuntime.Geometry;
 using Esri.ArcGISRuntime.Symbology;
@@ -16,8 +14,9 @@ namespace NewsViewer_WPF
     public partial class MainWindow : Window
     {
 
+        // A few hard coded variables that can be adjusted depending on where GitHib repo is
+        // laid down on disk.
         string _NEWSFILE = @"C:\NewsViewer\NYTimesData\topStoriesParsed.txt";
-
         string _SHAPEFILEPATH = @"C:\NewsViewer\Shapefiles\WorldCountries.shp";
 
         public MainWindow()
@@ -25,6 +24,30 @@ namespace NewsViewer_WPF
             InitializeComponent();
 
             Initialize();
+        }
+
+        private void Initialize()
+        {
+            // Create a new map to display in the map view with the oceans basemap.
+            MyMapView.Map = new Map(Basemap.CreateOceans());
+
+            try
+            {
+                // Load the shape file in the map.
+                LoadTheShapefile();
+
+                // Add an event handler to listen for taps/clicks to start the identify operation.
+                MyMapView.GeoViewTapped += MyMapView_GeoViewTapped;
+
+                // Add an event handler for when the user chooses a day from the date picker.
+                MyDatePicker.SelectedDateChanged += MyDatePicker_SelectedDateChanged;
+
+            }
+            catch (Exception e)
+            {
+                // Something went wrong; show an error message to the user.
+                MessageBox.Show(e.ToString(), "Error initializing the application.");
+            }
         }
 
         private async void LoadTheShapefile()
@@ -138,37 +161,30 @@ namespace NewsViewer_WPF
                 // Get the geometry (aka shape) for one feature.
                 Geometry myGeometry = myFeature.Geometry;
 
-                // Loop through key/value pair of the features attributes. 
-                foreach (KeyValuePair<string, object> myKeyValuePair in myFeature.Attributes)
+                // Get the value (aka. the text for the record of a specific field).
+                var myValue = (string)myFeature.Attributes["NAME"];
+
+                // Loop through each NY Times article.
+                foreach (string oneNYTimesArticle in myNYTimesArticles)
                 {
-                    // Get the key (aka. field name).
-                    var myKey = myKeyValuePair.Key;
+                    // Remove an embedded double quotes that may be in or surrounding the country name in the NY Times data base.
+                    char[] charsToTrim = { '"' };
+                    string country = oneNYTimesArticle.Split('~')[2].Trim(charsToTrim);
 
-                    // Get the value (aka. the text for the record of a specific field).
-                    var myValue = myKeyValuePair.Value;
-
-                    // Check is the name of the field in the shape file is 'NAME'. This represents the country name.
-                    if (myKey == "NAME")
+                    // Find a match from the shape file country feature and the NY Times country name in the article.
+                    if ((string)myValue == country)
                     {
-                        // Loop through each NY Times article.
-                        foreach (string oneNYTimesArticle in myNYTimesArticles)
-                        {
-                            // Remove an embedded double quotes that may be in or surrounding the country name in the NY Times data base.
-                            char[] charsToTrim = { '"' };
-                            string country = oneNYTimesArticle.Split('~')[2].Trim(charsToTrim);
+                        // Create a new polygon feature, provide geometry and attribute values.
+                        Feature polyFeature = myFeatureCollectionTable.CreateFeature();
+                        polyFeature.SetAttributeValue(myAreaNameField, country);
+                        polyFeature.Geometry = myGeometry;
 
-                            // Find a match from the shape file country feature and the NY Times country name in the article.
-                            if ((string)myValue == country)
-                            {
-                                // Create a new polygon feature, provide geometry and attribute values.
-                                Feature polyFeature = myFeatureCollectionTable.CreateFeature();
-                                polyFeature.SetAttributeValue(myAreaNameField, country);
-                                polyFeature.Geometry = myGeometry;
+                        // Add the new features to the appropriate feature collection table.
+                        await myFeatureCollectionTable.AddFeatureAsync(polyFeature);
 
-                                // Add the new features to the appropriate feature collection table.
-                                await myFeatureCollectionTable.AddFeatureAsync(polyFeature);
-                            }
-                        }
+                        // Once we have found a matching country in the subset news article file that matches a shape file record
+                        // there is no need to find another one since we have just created a record in the FeatureCollectionTable. 
+                        break;
                     }
                 }
             }
@@ -189,30 +205,6 @@ namespace NewsViewer_WPF
             MyMapView.Map.OperationalLayers.Add(myFeatureCollectionLayer);
         }
 
-        private void Initialize()
-        {
-            // Create a new map to display in the map view with the oceans basemap.
-            MyMapView.Map = new Map(Basemap.CreateOceans());
-
-            try
-            {
-                // Load the shape file in the map.
-                LoadTheShapefile();
-
-                // Add an event handler to listen for taps/clicks to start the identify operation.
-                MyMapView.GeoViewTapped += MySceneView_GeoViewTapped;
-
-                // Add an event handler for when the user chooses a day from the date picker.
-                MyDatePicker.SelectedDateChanged += MyDatePicker_SelectedDateChanged;
-
-            }
-            catch (Exception e)
-            {
-                // Something went wrong; show an error message to the user.
-                MessageBox.Show(e.ToString(), "Error initializing the application.");
-            }
-        }
-
         private void LoadNyTimesTopStories_Click(object sender, RoutedEventArgs e)
         {
 
@@ -225,6 +217,7 @@ namespace NewsViewer_WPF
             // Reset the RichTextBox to being blank.
             ResetTheTichTextBox();
 
+            // Another hard-coded variable that may need to be adjusted depending on where the GitHub repo was installed.
             // Construct the path and file name for the NY Times top stories articles. 
             _NEWSFILE = @"C:\NewsViewer\NYTimesData\topStoriesParsed.txt";
 
@@ -250,7 +243,10 @@ namespace NewsViewer_WPF
             string myYear = myDateTime.Year.ToString();
             string myMonth = myDateTime.Month.ToString();
             string myDay = myDateTime.Day.ToString();
+
+            // Another hard-coded variable that may need to be adjusted depending on where the GitHub repo was installed.
             string myFileName = @"C:\NewsViewer\NYTimesData\" + myYear + "-" + myMonth + "-" + myDay + ".txt";
+
             _NEWSFILE = myFileName;
 
             // Create a feature collection layer from the NY Times articles file and add it to the map. Only those country names 
@@ -259,7 +255,7 @@ namespace NewsViewer_WPF
             CreateFeatureCollectionLayerFromNYTimesArticles();
         }
 
-        private async void MySceneView_GeoViewTapped(object sender, Esri.ArcGISRuntime.UI.Controls.GeoViewInputEventArgs e)
+        private async void MyMapView_GeoViewTapped(object sender, Esri.ArcGISRuntime.UI.Controls.GeoViewInputEventArgs e)
         {
             try
             {
@@ -335,6 +331,8 @@ namespace NewsViewer_WPF
                                     {
                                         // Create a paragraph.
                                         Paragraph myParagraph = new Paragraph();
+
+                                        myParagraph.FontSize = 18;
 
                                         // Create a run that contains the country and a new line.
                                         Run myRun = new Run(myValue.ToString() + System.Environment.NewLine);

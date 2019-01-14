@@ -6,19 +6,23 @@
         xmlns:local="clr-namespace:NewsViewer_WPF"
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800">
+        Title="NewsViewer" Height="800" Width="1200">
     <Grid>
-        <esri:MapView x:Name="MyMapView" />
-        <RichTextBox Background="LightGray" x:Name="MyRichTextBox" HorizontalAlignment="Left" Height="168" Margin="10,569,0,0" 
-                     VerticalAlignment="Top" Width="772"  
-                     VerticalScrollBarVisibility="Visible">
-            <FlowDocument>
-                <Paragraph>
-                    <Run Text="RichTextBox"/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
-        <Button x:Name="LoadNyTimesTopStories" Content="Load NY Times Top Stories" Click="LoadNyTimesTopStories_Click" Margin="10,0,625,729" />
-        <DatePicker x:Name="MyDatePicker" Margin="10,45,625,649" DisplayDateStart="2018,01,01" DisplayDateEnd="2019,01,12" />
+        
+        <esri:MapView x:Name="MyMapView" WrapAroundMode="EnabledWhenSupported"/>
+        
+        <Border VerticalAlignment="Bottom" HorizontalAlignment="Stretch" BorderBrush="Black" BorderThickness="4" Padding="4" Margin="10,0,10,20" Background="White">
+            <RichTextBox Background="LightGray" x:Name="MyRichTextBox" Height="170" VerticalScrollBarVisibility="Visible" />
+        </Border>
+
+        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Background="White" BorderBrush="Black" BorderThickness="2" Padding="4">
+            <StackPanel>
+                <Button x:Name="LoadNyTimesTopStories" Content="Load NY Times Top Stories" Click="LoadNyTimesTopStories_Click" Margin="0,0,0,4" Padding="4,2"/>
+        
+                <!-- TODO: Adjust the DisplayStartDate and DisplayEndDate to match the subset ASCII NY Times data files downloaded using the AppStudio applet. -->
+                <DatePicker x:Name="MyDatePicker" DisplayDateStart="2018,01,01" DisplayDateEnd="2019,01,12" />
+            </StackPanel>
+        </Border>
+        
     </Grid>
 </Window>
